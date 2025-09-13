@@ -73,6 +73,11 @@ public static partial class Module
         {
             scheduled_at = new ScheduleAt.Interval(TimeSpan.FromMilliseconds(500))
         });
+        ctx.Db.move_all_players_timer.Insert(new MoveAllPlayersTimer
+        {
+            scheduled_at = new ScheduleAt.Interval(TimeSpan.FromMilliseconds(50))
+        });
+
     }
 
 
@@ -200,20 +205,59 @@ public static partial class Module
         return entity;
     }
 
-
-
-}
-
-// This allows us to store 2D points in tables.
-[SpacetimeDB.Type]
-public partial struct DbVector2
-{
-    public float x;
-    public float y;
-
-    public DbVector2(float x, float y)
+    [Reducer]
+    public static void UpdatePlayerInput(ReducerContext ctx, DbVector2 direction)
     {
-        this.x = x;
-        this.y = y;
+        var player = ctx.Db.player.identity.Find(ctx.Sender) ?? throw new Exception("Player not found");
+        foreach (var c in ctx.Db.circle.player_id.Filter(player.player_id))
+        {
+            var circle = c;
+            circle.direction = direction.Normalized;
+            circle.speed = Math.Clamp(direction.Magnitude, 0f, 1f);
+            ctx.Db.circle.entity_id.Update(circle);
+        }
     }
+
+    [Table(Name = "move_all_players_timer", Scheduled = nameof(MoveAllPlayers), ScheduledAt = nameof(scheduled_at))]
+    public partial struct MoveAllPlayersTimer
+    {
+        [PrimaryKey, AutoInc]
+        public ulong scheduled_id;
+        public ScheduleAt scheduled_at;
+    }
+
+    const uint START_PLAYER_SPEED = 10;
+
+    public static float MassToMaxMoveSpeed(uint mass) => 2f * START_PLAYER_SPEED / (1f + MathF.Sqrt((float)mass / START_PLAYER_MASS));
+
+    [Reducer]
+    public static void MoveAllPlayers(ReducerContext ctx, MoveAllPlayersTimer timer)
+    {
+        var world_size = (ctx.Db.config.id.Find(0) ?? throw new Exception("Config not found")).world_size;
+
+        var circle_directions = ctx.Db.circle.Iter().Select(c => (c.entity_id, c.direction * c.speed)).ToDictionary();
+
+        // Handle player input
+        foreach (var circle in ctx.Db.circle.Iter())
+        {
+            var check_entity = ctx.Db.entity.entity_id.Find(circle.entity_id);
+            if (check_entity == null)
+            {
+                // This can happen if the circle has been eaten by another circle.
+                continue;
+            }
+            var circle_entity = check_entity.Value;
+            var circle_radius = MassToRadius(circle_entity.mass);
+            var direction = circle_directions[circle.entity_id];
+            var new_pos = circle_entity.position + direction * MassToMaxMoveSpeed(circle_entity.mass);
+            circle_entity.position.x = Math.Clamp(new_pos.x, circle_radius, world_size - circle_radius);
+            circle_entity.position.y = Math.Clamp(new_pos.y, circle_radius, world_size - circle_radius);
+            ctx.Db.entity.entity_id.Update(circle_entity);
+        }
+    }
+
+
+
+
+
 }
