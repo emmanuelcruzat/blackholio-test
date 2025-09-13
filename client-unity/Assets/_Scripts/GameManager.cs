@@ -15,8 +15,8 @@ public class GameManager : MonoBehaviour
     public static Dictionary<uint, EntityController> Entities = new Dictionary<uint, EntityController>();
     public static Dictionary<uint, PlayerController> Players = new Dictionary<uint, PlayerController>();
 
-    const string SERVER_URL = "http://127.0.0.1:3000";
-    const string MODULE_NAME = "blackholio";
+    const string SERVER_URL = "https://maincloud.spacetimedb.com";
+    const string MODULE_NAME = "blackholio-30";
 
     public static event Action OnConnected;
     public static event Action OnSubscriptionApplied;
@@ -28,6 +28,8 @@ public class GameManager : MonoBehaviour
     public static Identity LocalIdentity { get; private set; }
     private void Start()
     {
+        PlayerPrefs.DeleteAll();
+        
         Instance = this;
         Application.targetFrameRate = 60;
 
