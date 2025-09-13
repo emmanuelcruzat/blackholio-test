@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using SpacetimeDB;
@@ -118,6 +119,13 @@ public class PlayerController : MonoBehaviour
                 LockInputPosition = (Vector2)Input.mousePosition;
             }
         }
+
+        //shooting logic
+        if (Input.GetMouseButtonDown(0)) // left click
+        {
+            Debug.Log("Fired Garand");
+        }
+
 
         // Throttled input requests
         if (Time.time - LastMovementSendTimestamp >= SEND_UPDATES_FREQUENCY)
