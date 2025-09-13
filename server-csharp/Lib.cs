@@ -3,7 +3,17 @@ using SpacetimeDB;
 public static partial class Module
 {
 
-    [Table(Name = "spawn_food_timer", Scheduled = nameof(SpawnFood), ScheduledAt = nameof(scheduled_at))]
+    // bullet table
+    [Table(Name = "bullet", Public = true)]
+    public partial struct Bullet
+    {
+        [PrimaryKey, AutoInc]
+        public uint bullet_id;
+        public DbVector2 direction;
+        public float speed;
+    }
+
+[Table(Name = "spawn_food_timer", Scheduled = nameof(SpawnFood), ScheduledAt = nameof(scheduled_at))]
     public partial struct SpawnFoodTimer
     {
         [PrimaryKey, AutoInc]
