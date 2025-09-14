@@ -11,6 +11,7 @@ public static partial class Module
         public uint bullet_id;
         public DbVector2 direction;
         public float speed;
+        
     }
 
 [Table(Name = "spawn_food_timer", Scheduled = nameof(SpawnFood), ScheduledAt = nameof(scheduled_at))]
@@ -51,6 +52,7 @@ public static partial class Module
         public DbVector2 direction;
         public float speed;
         public SpacetimeDB.Timestamp last_split_time;
+        public uint health = 3;
     }
 
     [Table(Name = "food", Public = true)]
@@ -130,7 +132,7 @@ public static partial class Module
     const uint FOOD_MASS_MIN = 2;
     const uint FOOD_MASS_MAX = 4;
     const uint TARGET_FOOD_COUNT = 0;
-
+    
     public static float MassToRadius(uint mass) => MathF.Sqrt(mass);
 
     [Reducer]
@@ -184,7 +186,7 @@ public static partial class Module
     public static uint Range(this Random rng, uint min, uint max) => (uint)rng.NextInt64(min, max);
 
     const uint START_PLAYER_MASS = 15;
-
+    const uint HEALTH = 3;
     [Reducer]
     public static void EnterGame(ReducerContext ctx, string name)
     {
@@ -205,6 +207,7 @@ public static partial class Module
         return SpawnCircleAt(
             ctx,
             player_id,
+            HEALTH,
             START_PLAYER_MASS,
             new DbVector2(x, y),
             ctx.Timestamp
@@ -226,6 +229,7 @@ public static partial class Module
             direction = new DbVector2(0, 1),
             speed = 0f,
             last_split_time = timestamp,
+            health = 3,
         });
         return entity;
     }
@@ -243,7 +247,7 @@ public static void UpdatePlayerInput(ReducerContext ctx, DbVector2 direction)
         {
             // If moving, update direction and speed
             circle.direction = direction.Normalized;
-            circle.speed = Math.Clamp(direction.Magnitude, 0f, 1f);
+            circle.speed = Math.Clamp(direction.Magnitude, 0f, .5f);
         }
         else
         {
