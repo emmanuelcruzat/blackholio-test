@@ -164,6 +164,21 @@ public static partial class Module
         }
     }
 
+    [Reducer]
+    public static void SpawnBullet(ReducerContext ctx)
+    {
+            var entity = ctx.Db.entity.Insert(new Entity()
+            {
+                position = new DbVector2(x, y),
+                mass = food_mass,
+            });
+            ctx.Db.bullet.Insert(new Bullet
+            {
+                entity_id = entity.entity_id,
+            });
+            //Log.Info($"Spawned food! {entity.entity_id}");
+    }
+
     public static float Range(this Random rng, float min, float max) => rng.NextSingle() * (max - min) + min;
 
     public static uint Range(this Random rng, uint min, uint max) => (uint)rng.NextInt64(min, max);
