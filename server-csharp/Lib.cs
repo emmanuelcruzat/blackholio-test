@@ -41,6 +41,7 @@ public static partial class Module
         public DbVector2 direction;
         public float speed;
         public SpacetimeDB.Timestamp last_split_time;
+        public uint health;
     }
 
     [Table(Name = "food", Public = true)]
@@ -159,6 +160,7 @@ public static partial class Module
     public static uint Range(this Random rng, uint min, uint max) => (uint)rng.NextInt64(min, max);
 
     const uint START_PLAYER_MASS = 15;
+    const uint HEALTH = 3;
 
     [Reducer]
     public static void EnterGame(ReducerContext ctx, string name)
@@ -180,6 +182,7 @@ public static partial class Module
         return SpawnCircleAt(
             ctx,
             player_id,
+            HEALTH,
             START_PLAYER_MASS,
             new DbVector2(x, y),
             ctx.Timestamp
@@ -200,6 +203,7 @@ public static partial class Module
             player_id = player_id,
             direction = new DbVector2(0, 1),
             speed = 0f,
+             health = 3,
             last_split_time = timestamp,
         });
         return entity;

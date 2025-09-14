@@ -100,15 +100,32 @@ public class PlayerController : MonoBehaviour
     public void SetTestInput(Vector2 input) => testInput = input;
     public void EnableTestInput() => testInputEnabled = true;
 
-    public void Update()
+   public void Update()
+{
+    if (!IsLocalPlayer || NumberOfOwnedCircles == 0)
     {
-        if (!IsLocalPlayer || NumberOfOwnedCircles == 0)
-        {
-            return;
-        }
+        return;
+    }
 
-        if (Input.GetKeyDown(KeyCode.Q))
+    // --- MOUSE AIMING LOGIC (Runs every frame for smooth aiming) ---
+    Ray cameraRay = Camera.main.ScreenPointToRay(Input.mousePosition);
+    Plane groundPlane = new Plane(Vector3.up, new Vector3(0, transform.position.y, 0));
+    if (groundPlane.Raycast(cameraRay, out float rayLength))
+    {
+        Vector3 pointToLookAt = cameraRay.GetPoint(rayLength);
+        transform.LookAt(pointToLookAt);
+    }
+    
+    // --- YOUR EXISTING LOGIC ---
+    if (Input.GetKeyDown(KeyCode.Q))
+    {
+        if (LockInputPosition.HasValue)
         {
+            LockInputPosition = null;
+        }
+        else
+        {
+<<<<<<< Updated upstream
             if (LockInputPosition.HasValue)
             {
                 LockInputPosition = null;
@@ -135,7 +152,43 @@ public class PlayerController : MonoBehaviour
             var direction = (mousePosition - centerOfScreen) / (screenSize.y / 3);
             if (testInputEnabled) { direction = testInput; }
             GameManager.Conn.Reducers.UpdatePlayerInput(direction);
+=======
+            LockInputPosition = (Vector2)Input.mousePosition;
+>>>>>>> Stashed changes
         }
     }
+
+    if (Input.GetMouseButtonDown(0)) // left click
+    {
+        Debug.Log("Fired Garand");
+    }
+
+    // --- THROTTLED MOVEMENT LOGIC ---
+    if (Time.time - LastMovementSendTimestamp >= SEND_UPDATES_FREQUENCY)
+    {
+        LastMovementSendTimestamp = Time.time;
+        
+        // --- RELATIVE MOVEMENT CALCULATION ---
+        float horizontalInput = Input.GetAxis("Horizontal");
+        float verticalInput = Input.GetAxis("Vertical");
+
+        Vector3 moveDirection = (transform.forward * verticalInput) + (transform.right * horizontalInput);
+        
+        // Only send an update if there is any movement input
+        // Using magnitude is slightly more robust for vectors than checking against zero
+        if (moveDirection.magnitude > 0.1f)
+        {
+            // Normalize to prevent faster diagonal movement
+            moveDirection.Normalize();
+            
+            // Your reducer likely expects a Vector2 (X, Y/Z). We send X and Z.
+            var directionToSend = new Vector2(moveDirection.x, moveDirection.z);
+            
+            if (testInputEnabled) { directionToSend = testInput; }
+            
+            GameManager.Conn.Reducers.UpdatePlayerInput(directionToSend);
+        }
+    }
+}
 
 }
