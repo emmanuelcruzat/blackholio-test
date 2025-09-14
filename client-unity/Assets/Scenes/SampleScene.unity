@@ -533,7 +533,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ec9c2508315a4114e8114b8f8510e580, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Crosshair
-  plusCursor: {fileID: 0}
+  plusCursor: {fileID: 1808831418}
 --- !u!1 &1808831414
 GameObject:
   m_ObjectHideFlags: 0

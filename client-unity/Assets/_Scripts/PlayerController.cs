@@ -124,7 +124,7 @@ public class PlayerController : MonoBehaviour
         {
             LastMovementSendTimestamp = Time.time;
 
-            var mousePosition = LockInputPosition ?? (Vector2)Input.mousePosition;
+            /*var mousePosition = LockInputPosition ?? (Vector2)Input.mousePosition;
             var screenSize = new Vector2
             {
                 x = Screen.width,
@@ -133,8 +133,21 @@ public class PlayerController : MonoBehaviour
             var centerOfScreen = screenSize / 2;
 
             var direction = (mousePosition - centerOfScreen) / (screenSize.y / 3);
+            */
+            // Get input from A/D keys or Left/Right arrows (-1.0 to 1.0)
+        float horizontalInput = Input.GetAxis("Horizontal");
+
+        // Get input from W/S keys or Up/Down arrows (-1.0 to 1.0)
+        float verticalInput = Input.GetAxis("Vertical");
+
+        // Combine them into a single direction vector
+        var direction = new Vector2(horizontalInput, verticalInput);
             if (testInputEnabled) { direction = testInput; }
+            if (direction != Vector2.zero)
+        {
             GameManager.Conn.Reducers.UpdatePlayerInput(direction);
+        }
+            
         }
     }
 

@@ -206,17 +206,29 @@ public static partial class Module
     }
 
     [Reducer]
-    public static void UpdatePlayerInput(ReducerContext ctx, DbVector2 direction)
+public static void UpdatePlayerInput(ReducerContext ctx, DbVector2 direction)
+{
+    var player = ctx.Db.player.identity.Find(ctx.Sender) ?? throw new Exception("Player not found");              
+    foreach (var c in ctx.Db.circle.player_id.Filter(player.player_id))
     {
-        var player = ctx.Db.player.identity.Find(ctx.Sender) ?? throw new Exception("Player not found");
-        foreach (var c in ctx.Db.circle.player_id.Filter(player.player_id))
+        var circle = c;
+
+        // ✅ This check prevents the division-by-zero error
+        if (direction.Magnitude > 0.001f)
         {
-            var circle = c;
+            // If moving, update direction and speed
             circle.direction = direction.Normalized;
             circle.speed = Math.Clamp(direction.Magnitude, 0f, 1f);
-            ctx.Db.circle.entity_id.Update(circle);
         }
+        else
+        {
+            // If not moving, just set speed to 0
+            circle.speed = 0f;
+        }
+
+        ctx.Db.circle.entity_id.Update(circle);
     }
+}
 
     [Table(Name = "move_all_players_timer", Scheduled = nameof(MoveAllPlayers), ScheduledAt = nameof(scheduled_at))]
     public partial struct MoveAllPlayersTimer
