@@ -40,9 +40,4 @@ public class PrefabManager : MonoBehaviour
 		playerController.Initialize(player);
 		return playerController;
 	}
-
-/*
-	public static BulletController SpawnBullet(Bullet bullet)
-	{ }
-*/
 }
