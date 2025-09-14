@@ -169,8 +169,8 @@ public class GameManager : MonoBehaviour
 
     private static void FoodOnInsert(EventContext context, Food insertedValue)
     {
-        var entityController = PrefabManager.SpawnFood(insertedValue);
-        Entities.Add(insertedValue.EntityId, entityController);
+        //var entityController = PrefabManager.SpawnFood(insertedValue);
+        //Entities.Add(insertedValue.EntityId, entityController);
     }
 
     private static void PlayerOnInsert(EventContext context, Player insertedPlayer)
