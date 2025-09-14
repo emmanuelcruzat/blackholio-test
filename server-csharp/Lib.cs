@@ -119,7 +119,7 @@ public static partial class Module
 
     const uint FOOD_MASS_MIN = 2;
     const uint FOOD_MASS_MAX = 4;
-    const uint TARGET_FOOD_COUNT = 600;
+    const uint TARGET_FOOD_COUNT = 0;
 
     public static float MassToRadius(uint mass) => MathF.Sqrt(mass);
 
