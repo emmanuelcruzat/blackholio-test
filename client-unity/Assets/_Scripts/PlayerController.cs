@@ -7,6 +7,10 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
+    private int shots = 8;
+     public AudioSource shotSource;  // main gunshot
+    public AudioSource echoSource;  // echo / secondary sound
+
     const int SEND_UPDATES_PER_SEC = 20;
     const float SEND_UPDATES_FREQUENCY = 1f / SEND_UPDATES_PER_SEC;
 
@@ -124,6 +128,16 @@ public class PlayerController : MonoBehaviour
         if (Input.GetMouseButtonDown(0)) // left click
         {
             Debug.Log("Fired Garand");
+            shotSource.pitch = UnityEngine.Random.Range(0.95f, 1.05f);
+            shotSource.PlayOneShot(shotSource.clip);
+            shots--;
+
+            if (shots < 1)
+            {
+                echoSource.pitch = UnityEngine.Random.Range(0.98f, 1.02f);
+                echoSource.PlayOneShot(echoSource.clip);
+                shots = 8;
+            }
         }
 
 
